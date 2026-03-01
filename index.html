@@ -8,488 +8,287 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Devicons font — reliable icon set with CSS color control -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css">
   <style>
-    /* ─── TOKENS ─────────────────────────────────────── */
+    /* ── TOKENS (dark default) ──────────────────────── */
     :root {
-      --black:       #000000;
-      --white:       #ffffff;
-      --orange:      #FF5C00;
-      --cyan:        #00FFFF;
-      --card:        #080808;
-      --border:      #1e1e1e;
-      --border-hi:   #2e2e2e;
-      --muted:       #555555;
-      --dim:         #333333;
-      --mono:        'Space Mono', monospace;
-      --sans:        'Outfit', sans-serif;
-      --glow-o:      drop-shadow(0 0 6px rgba(255,92,0,0.75));
-      --glow-c:      drop-shadow(0 0 6px rgba(0,255,255,0.75));
+      --bg:      #000;
+      --fg:      #fff;
+      --card:    #080808;
+      --border:  #1e1e1e;
+      --border2: #2e2e2e;
+      --muted:   #555;
+      --dim:     #333;
+      --orange:  #FF5C00;
+      --cyan:    #00FFFF;
+      --mono:    'Space Mono', monospace;
+      --sans:    'Outfit', sans-serif;
+      --go:      drop-shadow(0 0 6px rgba(255,92,0,.8));
+      --gc:      drop-shadow(0 0 6px rgba(0,255,255,.8));
+    }
+    html.light {
+      --bg:      #f2f2f2;
+      --fg:      #0a0a0a;
+      --card:    #ffffff;
+      --border:  #e0e0e0;
+      --border2: #d0d0d0;
+      --muted:   #666;
+      --dim:     #bbb;
+      --cyan:    #0099AA;
+      --gc:      drop-shadow(0 0 4px rgba(0,140,160,.7));
     }
 
-    /* ─── RESET ──────────────────────────────────────── */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--black); color: var(--white); font-family: var(--sans); overflow-x: hidden; cursor: none; }
-    a { color: inherit; text-decoration: none; }
-    img { display: block; }
+    /* ── RESET ──────────────────────────────────────── */
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--fg);font-family:var(--sans);overflow-x:hidden;cursor:none;transition:background .3s,color .3s}
+    a{color:inherit;text-decoration:none}
 
-    /* ─── BACKGROUND ─────────────────────────────────── */
-    /* Skewed-rectangle diamond grid */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: -2;
+    /* ── BACKGROUND LAYERS ──────────────────────────── */
+    /* diamond grid */
+    body::before{
+      content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
       background-image:
-        repeating-linear-gradient(-45deg,
-          transparent 0, transparent 48px,
-          rgba(255,255,255,0.022) 48px, rgba(255,255,255,0.022) 49px),
-        repeating-linear-gradient(45deg,
-          transparent 0, transparent 48px,
-          rgba(255,255,255,0.022) 48px, rgba(255,255,255,0.022) 49px);
-      pointer-events: none;
+        repeating-linear-gradient(-45deg,transparent 0,transparent 48px,rgba(128,128,128,.04) 48px,rgba(128,128,128,.04) 49px),
+        repeating-linear-gradient( 45deg,transparent 0,transparent 48px,rgba(128,128,128,.04) 48px,rgba(128,128,128,.04) 49px);
     }
-    /* Ambient orange/cyan corner glow */
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: -1;
+    /* ambient corner glow */
+    body::after{
+      content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
       background:
-        radial-gradient(ellipse 55% 40% at 5%  95%, rgba(255,92,0,0.055) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 40% at 95%  5%, rgba(0,255,255,0.04)  0%, transparent 60%);
-      pointer-events: none;
+        radial-gradient(ellipse 55% 40% at 5% 95%, rgba(255,92,0,.055) 0%,transparent 60%),
+        radial-gradient(ellipse 55% 40% at 95% 5%, rgba(0,255,255,.04) 0%,transparent 60%);
     }
 
-    /* ─── CURSOR ─────────────────────────────────────── */
-    /* Always at left:0 top:0 — moved entirely via transform = GPU composited */
-    .cursor {
-      position: fixed; left: 0; top: 0;
-      width: 8px; height: 8px;
-      background: var(--orange);
-      border-radius: 50%;
-      pointer-events: none; z-index: 9999;
-      will-change: transform;
-      transition: width .15s, height .15s, background .2s;
-    }
-    .cursor-ring {
-      position: fixed; left: 0; top: 0;
-      width: 30px; height: 30px;
-      border: 1px solid rgba(255,92,0,.45);
-      border-radius: 50%;
-      pointer-events: none; z-index: 9998;
-      will-change: transform;
-      transition: width .2s, height .2s, border-color .2s;
-    }
-    body.hov .cursor       { width: 12px; height: 12px; background: var(--cyan); }
-    body.hov .cursor-ring  { width: 48px; height: 48px; border-color: rgba(0,255,255,.3); }
+    /* ── CURSOR ─────────────────────────────────────── */
+    .cur,.ring{position:fixed;left:0;top:0;pointer-events:none;will-change:transform}
+    .cur {width:8px;height:8px;background:var(--orange);border-radius:50%;z-index:9999;transition:width .15s,height .15s,background .2s}
+    .ring{width:30px;height:30px;border:1px solid rgba(255,92,0,.45);border-radius:50%;z-index:9998;transition:width .2s,height .2s,border-color .2s}
+    body.hov .cur {width:12px;height:12px;background:var(--cyan)}
+    body.hov .ring{width:50px;height:50px;border-color:rgba(0,255,255,.3)}
 
-    /* ─── BOOT ───────────────────────────────────────── */
-    #boot {
-      position: fixed; inset: 0; z-index: 800;
-      background: var(--black);
-      display: flex; flex-direction: column;
-      justify-content: center;
-      padding: 4rem 8vw;
-      font-family: var(--mono); font-size: 13px;
-      transition: opacity .5s ease;
-    }
-    #boot.out { opacity: 0; pointer-events: none; }
-    .bl { opacity: 0; margin-bottom: .4rem; transition: opacity .12s ease; }
-    .bl.s  { opacity: 1; }
-    .bl.d  { color: var(--muted); }
-    .bl.g  { color: #4ade80; }
-    .bl.w  { color: var(--orange); }
-    .bl.c  { color: var(--cyan); }
-    .boot-bar-wrap { margin-top: 1.75rem; width: min(420px,80vw); height: 1px; background: var(--border-hi); }
-    .boot-bar      { height: 100%; width: 0; background: linear-gradient(to right, var(--orange), var(--cyan)); transition: width .08s; }
+    /* ── BOOT ───────────────────────────────────────── */
+    #boot{position:fixed;inset:0;z-index:800;background:#000;display:flex;flex-direction:column;justify-content:center;padding:4rem 8vw;font-family:var(--mono);font-size:13px;transition:opacity .5s}
+    #boot.out{opacity:0;pointer-events:none}
+    .bl{opacity:0;margin-bottom:.4rem;transition:opacity .1s}
+    .bl.s{opacity:1} .bl.d{color:#444} .bl.g{color:#4ade80} .bl.w{color:var(--orange)} .bl.c{color:var(--cyan)}
+    .bw{margin-top:1.75rem;width:min(420px,80vw);height:1px;background:#222}
+    .bb{height:100%;width:0;background:linear-gradient(to right,var(--orange),var(--cyan));transition:width .08s}
 
-    /* ─── NAV ────────────────────────────────────────── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      height: 56px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem;
-      border-bottom: 1px solid transparent;
-      transition: background .3s, border-color .3s, backdrop-filter .3s;
-    }
-    nav.sc {
-      background: rgba(0,0,0,.85);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      border-color: var(--border);
-    }
-    .nav-logo { font-family: var(--mono); font-size: 14px; letter-spacing: .08em; }
-    .nav-logo .o { color: var(--orange); }
-    .nav-logo .c { color: var(--cyan); }
-    .nav-status { display: flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: 11px; color: var(--muted); }
-    .ndot { width: 7px; height: 7px; background: var(--orange); border-radius: 50%; animation: blink 1.4s ease infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .12em; transition: color .2s; }
-    .nav-links a:hover { color: var(--cyan); }
+    /* ── NAV ────────────────────────────────────────── */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;border-bottom:1px solid transparent;transition:background .3s,border-color .3s}
+    nav.sc{background:rgba(0,0,0,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-color:var(--border)}
+    html.light nav.sc{background:rgba(242,242,242,.9)}
+    .nlogo{font-family:var(--mono);font-size:14px;letter-spacing:.08em}
+    .nlogo .o{color:var(--orange)} .nlogo .c{color:var(--cyan)}
+    .nstat{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:11px;color:var(--muted)}
+    .ndot{width:7px;height:7px;background:var(--orange);border-radius:50%;animation:blink 1.4s ease infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+    .nlinks{display:flex;gap:2rem;list-style:none}
+    .nlinks a{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.12em;transition:color .2s}
+    .nlinks a:hover{color:var(--cyan)}
+    /* theme toggle */
+    .theme-btn{background:none;border:1px solid var(--border2);padding:.35rem .6rem;cursor:none;color:var(--muted);transition:all .2s;display:flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:11px}
+    .theme-btn:hover{border-color:var(--orange);color:var(--orange)}
+    .theme-btn svg{width:14px;height:14px;flex-shrink:0}
+    .icon-sun{display:none} .icon-moon{display:block}
+    html.light .icon-sun{display:block} html.light .icon-moon{display:none}
 
-    /* ─── HERO ───────────────────────────────────────── */
-    #hero {
-      position: relative;
-      height: 100svh; min-height: 620px;
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 0 8vw; overflow: hidden;
-    }
-    /* animated dot grid via transform = GPU */
-    .hgrid {
-      position: absolute; inset: -60px; z-index: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,.055) 1px, transparent 1px);
-      background-size: 40px 40px;
-      will-change: transform;
-      animation: gdrift 28s linear infinite;
-    }
-    @keyframes gdrift { from{transform:translate(0,0)} to{transform:translate(40px,40px)} }
-    /* CRT scanlines */
-    .hscan {
-      position: absolute; inset: 0; z-index: 1;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.1) 3px, rgba(0,0,0,.1) 4px);
-      pointer-events: none;
-    }
-    /* bottom divider */
-    .hline {
-      position: absolute; bottom: 0; left: 8vw; right: 8vw; z-index: 2;
-      height: 1px;
-      background: linear-gradient(to right, var(--orange) 0%, rgba(255,92,0,.1) 60%, transparent 100%);
-    }
-    .hero-content { position: relative; z-index: 3; max-width: 1200px; }
+    /* ── HERO (always dark) ──────────────────────────── */
+    #hero{position:relative;height:100svh;min-height:620px;display:flex;flex-direction:column;justify-content:center;padding:0 8vw;overflow:hidden;background:#000;color:#fff}
+    .hgrid{position:absolute;inset:-60px;z-index:0;background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;will-change:transform;animation:gdrift 28s linear infinite}
+    @keyframes gdrift{from{transform:translate(0,0)}to{transform:translate(40px,40px)}}
+    .hscan{position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.1) 3px,rgba(0,0,0,.1) 4px);pointer-events:none}
+    #beams-canvas{position:absolute;inset:0;z-index:1;pointer-events:none}
+    .hline{position:absolute;bottom:0;left:8vw;right:8vw;z-index:3;height:1px;background:linear-gradient(to right,var(--orange) 0%,rgba(255,92,0,.1) 60%,transparent 100%)}
+    .hcontent{position:relative;z-index:4;max-width:1200px}
+    .pring{width:88px;height:88px;border-radius:50%;border:1px solid var(--orange);box-shadow:0 0 22px rgba(255,92,0,.35);overflow:hidden;margin-bottom:2rem;opacity:0;animation:sup .6s ease .2s forwards}
+    .pring img{width:100%;height:100%;object-fit:cover;filter:grayscale(15%)}
+    .htag{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.35em;text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:sup .6s ease .4s forwards}
+    .hname{font-family:var(--mono);font-weight:700;font-size:clamp(3rem,9.5vw,9rem);line-height:.93;letter-spacing:-.03em;margin-bottom:2.5rem;color:#fff;opacity:0;animation:sup .7s ease .6s forwards}
+    .gw{display:block;position:relative}
+    .gw::before,.gw::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:var(--mono);font-weight:700;pointer-events:none}
+    .gw::before{color:var(--orange);animation:gb 7s ease infinite}
+    .gw::after{color:#00FFFF;animation:ga 7s ease infinite}
+    @keyframes gb{0%,82%,100%{opacity:0;clip-path:inset(100% 0 0 0)}83%{opacity:1;clip-path:inset(15% 0 70% 0);transform:translateX(-4px)}84%{opacity:1;clip-path:inset(65% 0 10% 0);transform:translateX(3px)}85%{opacity:1;clip-path:inset(40% 0 42% 0);transform:translateX(-2px)}86%{opacity:0}}
+    @keyframes ga{0%,83%,100%{opacity:0;clip-path:inset(100% 0 0 0)}84%{opacity:1;clip-path:inset(55% 0 22% 0);transform:translateX(4px)}85%{opacity:1;clip-path:inset(8% 0 75% 0);transform:translateX(-3px)}86%{opacity:1;clip-path:inset(80% 0 5% 0);transform:translateX(2px)}87%{opacity:0}}
+    .hprompt{display:flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:clamp(.9rem,2vw,1.3rem);color:#fff;margin-bottom:2.5rem;opacity:0;animation:sup .7s ease .85s forwards}
+    .psym{color:var(--orange)}
+    .tcur{display:inline-block;width:2px;height:1.1em;background:#00FFFF;vertical-align:middle;animation:blink 1s step-end infinite}
+    .hcta{display:flex;gap:1rem;flex-wrap:wrap;opacity:0;animation:sup .6s ease 1.1s forwards}
+    @keyframes sup{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+    .btn{font-family:var(--mono);font-size:12px;padding:.8rem 1.75rem;letter-spacing:.12em;border:1px solid;cursor:none;transition:all .2s;display:inline-block}
+    .btnp{background:var(--orange);color:#000;border-color:var(--orange)} .btnp:hover{background:transparent;color:var(--orange)}
+    .btng{background:transparent;color:#fff;border-color:#333} .btng:hover{border-color:#00FFFF;color:#00FFFF}
+    .shint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:#333;z-index:4;opacity:0;animation:sup .6s ease 1.6s forwards}
+    .sline{width:1px;height:42px;background:linear-gradient(to bottom,transparent,var(--orange));animation:spulse 2s ease infinite}
+    @keyframes spulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* profile photo */
-    .profile-ring {
-      width: 88px; height: 88px;
-      border-radius: 50%;
-      border: 1px solid var(--orange);
-      box-shadow: 0 0 22px rgba(255,92,0,.35), inset 0 0 22px rgba(255,92,0,.04);
-      overflow: hidden;
-      margin-bottom: 2rem;
-      opacity: 0;
-      animation: sup .6s ease .2s forwards;
-    }
-    .profile-ring img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(15%); }
+    /* ── SECTIONS ────────────────────────────────────── */
+    .band{border-top:1px solid var(--border)}
+    .wrap{max-width:1200px;margin:0 auto;padding:7rem 8vw}
+    .eye{font-family:var(--mono);font-size:11px;color:var(--orange);letter-spacing:.35em;text-transform:uppercase;margin-bottom:.6rem}
+    .stit{font-family:var(--mono);font-weight:700;font-size:clamp(1.6rem,3.5vw,2.7rem);line-height:1.1;margin-bottom:3.5rem}
+    .stit .d{color:var(--muted)}
+    .rv{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+    .rv.in{opacity:1;transform:none}
 
-    .hero-tag {
-      font-family: var(--mono); font-size: 12px; color: var(--cyan);
-      letter-spacing: .35em; text-transform: uppercase;
-      margin-bottom: 2rem;
-      opacity: 0; animation: sup .6s ease .4s forwards;
-    }
-    .hero-name {
-      font-family: var(--mono); font-weight: 700;
-      font-size: clamp(3rem, 9.5vw, 9rem);
-      line-height: .93; letter-spacing: -.03em;
-      margin-bottom: 2.5rem;
-      opacity: 0; animation: sup .7s ease .6s forwards;
-    }
-    /* Glitch */
-    .gw { display: block; position: relative; }
-    .gw::before, .gw::after {
-      content: attr(data-text);
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      font-family: var(--mono); font-weight: 700;
-      pointer-events: none;
-    }
-    .gw::before { color: var(--orange); animation: gb 7s ease infinite; }
-    .gw::after  { color: var(--cyan);   animation: ga 7s ease infinite; }
-    @keyframes gb {
-      0%,82%,100%{opacity:0;clip-path:inset(100% 0 0 0)}
-      83%{opacity:1;clip-path:inset(15% 0 70% 0);transform:translateX(-4px)}
-      84%{opacity:1;clip-path:inset(65% 0 10% 0);transform:translateX(3px)}
-      85%{opacity:1;clip-path:inset(40% 0 42% 0);transform:translateX(-2px)}
-      86%{opacity:0}
-    }
-    @keyframes ga {
-      0%,83%,100%{opacity:0;clip-path:inset(100% 0 0 0)}
-      84%{opacity:1;clip-path:inset(55% 0 22% 0);transform:translateX(4px)}
-      85%{opacity:1;clip-path:inset( 8% 0 75% 0);transform:translateX(-3px)}
-      86%{opacity:1;clip-path:inset(80% 0  5% 0);transform:translateX(2px)}
-      87%{opacity:0}
-    }
+    /* ── ABOUT ───────────────────────────────────────── */
+    .agrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .tcard{border:1px solid var(--border);background:var(--card);padding:2rem;position:relative;transition:background .3s,border-color .3s}
+    .tcard::before{content:'● ● ●';position:absolute;top:.9rem;left:1rem;font-size:8px;color:var(--dim);letter-spacing:.4em}
+    .thead{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1.5rem;margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:1px solid var(--border)}
+    .thead .path{color:var(--cyan)}
+    .bio{font-size:.95rem;line-height:1.85;color:var(--muted);margin-bottom:1.75rem}
+    .bio strong{color:var(--fg)}
+    .tags{display:flex;flex-wrap:wrap;gap:.5rem}
+    .tag{font-family:var(--mono);font-size:11px;padding:.3rem .8rem;border:1px solid var(--border);color:var(--muted);letter-spacing:.06em;transition:all .2s;cursor:default}
+    .tag:hover{border-color:var(--cyan);color:var(--cyan)}
+    .tag.hi{border-color:rgba(255,92,0,.3);color:var(--orange)}
+    .s4{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+    .sc{background:var(--card);padding:1.25rem 1rem;transition:background .2s}
+    .sc:hover{background:var(--bg)}
+    .sv{font-family:var(--mono);font-size:2.1rem;font-weight:700;display:block;line-height:1;margin-bottom:.35rem}
+    .sv .o{color:var(--orange)} .sv .c{color:var(--cyan)}
+    .sk{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}
 
-    .hero-prompt {
-      display: flex; align-items: center; gap: .6rem;
-      font-family: var(--mono); font-size: clamp(.9rem, 2vw, 1.3rem);
-      margin-bottom: 2.5rem;
-      opacity: 0; animation: sup .7s ease .85s forwards;
-    }
-    .psym { color: var(--orange); }
-    .tcur {
-      display: inline-block; width: 2px; height: 1.1em;
-      background: var(--cyan); vertical-align: middle;
-      animation: blink 1s step-end infinite;
-    }
-    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; opacity: 0; animation: sup .6s ease 1.1s forwards; }
+    /* ── SKILLS ──────────────────────────────────────── */
+    .ssec{margin-bottom:2.5rem}
+    .slbl{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.2em;margin-bottom:.85rem}
+    .slbl .cc{color:var(--cyan)}
+    .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:.4rem}
+    /* card with devicon font */
+    .skc{display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:.85rem .4rem;border:1px solid var(--border);background:var(--card);transition:all .2s;cursor:default}
+    .skc i{font-size:26px;transition:filter .2s}
+    .skc.o i{color:var(--orange);filter:var(--go)}
+    .skc.c i{color:var(--cyan);filter:var(--gc)}
+    .skc.o:hover{border-color:var(--orange);background:rgba(255,92,0,.03);box-shadow:0 0 14px rgba(255,92,0,.07)}
+    .skc.c:hover{border-color:var(--cyan);background:rgba(0,255,255,.03);box-shadow:0 0 14px rgba(0,255,255,.07)}
+    /* card with inline SVG */
+    .skc svg{width:26px;height:26px;flex-shrink:0}
+    .skc.o svg{color:var(--orange);filter:var(--go)}
+    .skc.c svg{color:var(--cyan);filter:var(--gc)}
+    .sn{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-align:center;letter-spacing:.03em;line-height:1.3}
+    /* text-only skill */
+    .skt{display:flex;align-items:center;justify-content:center;padding:.85rem .4rem;min-height:70px;border:1px solid var(--border);background:var(--card);font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;letter-spacing:.05em;transition:all .2s;cursor:default}
+    .skt.o:hover{border-color:var(--orange);color:var(--orange)}
+    .skt.c:hover{border-color:var(--cyan);color:var(--cyan)}
 
-    @keyframes sup { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:none} }
+    /* ── PROJECTS ────────────────────────────────────── */
+    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:var(--border)}
+    .pcard{background:var(--card);padding:2rem;position:relative;overflow:hidden;transition:background .25s}
+    .pcard::before{content:'';position:absolute;top:0;left:0;right:100%;height:1px;background:var(--orange);transition:right .38s ease}
+    .pcard:hover::before{right:0}
+    .pcard:hover{background:color-mix(in srgb,var(--card) 85%,var(--orange) 2%)}
+    .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.1rem}
+    .pty{font-family:var(--mono);font-size:10px;padding:.2rem .55rem;border:1px solid;letter-spacing:.1em}
+    .pty.o{color:var(--orange);border-color:rgba(255,92,0,.25);background:rgba(255,92,0,.05)}
+    .pty.c{color:var(--cyan);border-color:rgba(0,200,200,.2);background:rgba(0,200,200,.04)}
+    .ps{font-family:var(--mono);font-size:9px;color:#4ade80;letter-spacing:.12em;display:flex;align-items:center;gap:.3rem}
+    .ps::before{content:'●'}
+    .pn{font-family:var(--mono);font-size:15px;font-weight:700;margin-bottom:.55rem}
+    .pd{font-size:13px;line-height:1.7;color:var(--muted);margin-bottom:1.5rem}
+    .pst{display:flex;flex-wrap:wrap;gap:.4rem}
+    /* project tech tags — visible with orange/cyan alternating */
+    .pt{font-family:var(--mono);font-size:10px;padding:.2rem .55rem;border:1px solid rgba(255,92,0,.25);color:var(--orange);letter-spacing:.05em}
+    .pt.c{border-color:rgba(0,200,200,.2);color:var(--cyan)}
 
-    .btn {
-      font-family: var(--mono); font-size: 12px;
-      padding: .8rem 1.75rem; letter-spacing: .12em;
-      border: 1px solid; cursor: none;
-      transition: all .2s ease;
-    }
-    .btn-p { background: var(--orange); color: var(--black); border-color: var(--orange); }
-    .btn-p:hover { background: transparent; color: var(--orange); }
-    .btn-g { background: transparent; color: var(--white); border-color: var(--border-hi); }
-    .btn-g:hover { border-color: var(--cyan); color: var(--cyan); }
+    /* ── CONTACT ─────────────────────────────────────── */
+    .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+    .ccopy{font-size:1rem;line-height:1.9;color:var(--muted)}
+    .ccopy strong{color:var(--fg)}
+    .clinks{display:flex;flex-direction:column;gap:1rem}
+    .clink{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.25rem;border:1px solid var(--border);background:var(--card);transition:all .2s;font-family:var(--mono);font-size:13px;color:var(--muted)}
+    .clink:hover{border-color:var(--orange);color:var(--fg);background:var(--bg)}
+    .clink.ch:hover{border-color:var(--cyan)}
+    .clink i{font-size:20px;flex-shrink:0;filter:var(--go)}
+    .clink.ch i{filter:var(--gc)}
+    .clink.o i{color:var(--orange)} .clink.ch i{color:var(--cyan)}
+    .clbl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:.15rem}
+    .cval{color:var(--fg);font-size:13px}
 
-    .scroll-hint {
-      position: absolute; bottom: 2.5rem; left: 50%;
-      transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: .5rem;
-      font-family: var(--mono); font-size: 10px; letter-spacing: .25em; color: var(--dim);
-      z-index: 3;
-      opacity: 0; animation: sup .6s ease 1.6s forwards;
-    }
-    .sline { width: 1px; height: 42px; background: linear-gradient(to bottom, transparent, var(--orange)); animation: spulse 2s ease infinite; }
-    @keyframes spulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer{border-top:1px solid var(--border);padding:2.5rem 8vw;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .ftag{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .ftag .o{color:var(--orange)}
+    .fgh{display:flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:12px;transition:color .2s}
+    .fgh:hover{color:var(--cyan)}
+    .fcp{font-family:var(--mono);font-size:11px;color:var(--dim)}
 
-    /* ─── LAYOUT ─────────────────────────────────────── */
-    .band { border-top: 1px solid var(--border); }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 7rem 8vw; }
-    .eyebrow { font-family: var(--mono); font-size: 11px; color: var(--orange); letter-spacing: .35em; text-transform: uppercase; margin-bottom: .6rem; }
-    .stitle  { font-family: var(--mono); font-weight: 700; font-size: clamp(1.6rem,3.5vw,2.7rem); line-height: 1.1; margin-bottom: 3.5rem; }
-    .stitle .d { color: var(--muted); }
-
-    /* reveal on scroll */
-    .rv { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; }
-    .rv.in { opacity: 1; transform: none; }
-
-    /* ─── ABOUT ──────────────────────────────────────── */
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .tcard {
-      border: 1px solid var(--border); background: var(--card); padding: 2rem;
-      position: relative;
-    }
-    .tcard::before {
-      content: '● ● ●'; position: absolute; top: .9rem; left: 1rem;
-      font-size: 8px; color: var(--dim); letter-spacing: .4em;
-    }
-    .thead {
-      font-family: var(--mono); font-size: 11px; color: var(--muted);
-      letter-spacing: .2em; text-transform: uppercase;
-      margin-top: 1.5rem; margin-bottom: 1.5rem;
-      padding-bottom: .7rem; border-bottom: 1px solid var(--border);
-    }
-    .thead .path { color: var(--cyan); }
-    .bio { font-size: .95rem; line-height: 1.85; color: #999; margin-bottom: 1.75rem; }
-    .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .tag {
-      font-family: var(--mono); font-size: 11px;
-      padding: .3rem .8rem; border: 1px solid var(--border);
-      color: var(--muted); letter-spacing: .06em;
-      transition: all .2s;
-    }
-    .tag:hover { border-color: var(--cyan); color: var(--cyan); }
-    .tag.hi { border-color: rgba(255,92,0,.3); color: var(--orange); }
-
-    .stats4 { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
-    .scell { background: var(--card); padding: 1.25rem 1rem; transition: background .2s; }
-    .scell:hover { background: #0e0e0e; }
-    .sval { font-family: var(--mono); font-size: 2.1rem; font-weight: 700; display: block; line-height: 1; margin-bottom: .35rem; }
-    .sval .o { color: var(--orange); }
-    .sval .c { color: var(--cyan); }
-    .skey { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; }
-
-    /* ─── SKILLS ─────────────────────────────────────── */
-    .sk-section { margin-bottom: 2.5rem; }
-    .sk-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .2em; margin-bottom: .85rem; }
-    .sk-label .cc { color: var(--cyan); }
-    .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: .4rem; }
-    .sk-card {
-      display: flex; flex-direction: column; align-items: center; gap: .45rem;
-      padding: .85rem .4rem;
-      border: 1px solid var(--border); background: var(--card);
-      transition: all .2s ease; cursor: default;
-    }
-    .sk-card:hover { background: #0d0d0d; }
-    .sk-card.o:hover { border-color: var(--orange); box-shadow: 0 0 14px rgba(255,92,0,.08); }
-    .sk-card.c:hover { border-color: var(--cyan);   box-shadow: 0 0 14px rgba(0,255,255,.08); }
-    .sk-card img { width: 26px; height: 26px; }
-    .sk-card.o img { filter: var(--glow-o); }
-    .sk-card.c img { filter: var(--glow-c); }
-    .sk-n { font-family: var(--mono); font-size: 9.5px; color: var(--muted); text-align: center; letter-spacing: .03em; line-height: 1.3; }
-    /* text-only skill (no icon available) */
-    .sk-txt {
-      display: flex; align-items: center; justify-content: center;
-      padding: .85rem .4rem; min-height: 66px;
-      border: 1px solid var(--border); background: var(--card);
-      font-family: var(--mono); font-size: 10px; color: var(--muted);
-      text-align: center; letter-spacing: .05em;
-      transition: all .2s; cursor: default;
-    }
-    .sk-txt.o:hover { border-color: var(--orange); color: var(--orange); }
-    .sk-txt.c:hover { border-color: var(--cyan);   color: var(--cyan);   }
-
-    /* ─── PROJECTS ───────────────────────────────────── */
-    .proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1px; background: var(--border); }
-    .pcard {
-      background: var(--card); padding: 2rem; position: relative; overflow: hidden;
-      transition: background .25s;
-    }
-    /* animated top-border sweep */
-    .pcard::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 100%; height: 1px;
-      background: var(--orange); transition: right .38s ease;
-    }
-    .pcard:hover::before { right: 0; }
-    .pcard:hover { background: #0d0d0d; }
-    /* subtle noise texture on hover */
-    .pcard::after {
-      content: ''; position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0; mix-blend-mode: overlay; pointer-events: none;
-      transition: opacity .25s;
-    }
-    .pcard:hover::after { opacity: .05; }
-    .ph { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.1rem; }
-    .ptype {
-      font-family: var(--mono); font-size: 10px; padding: .2rem .55rem;
-      border: 1px solid; letter-spacing: .1em;
-    }
-    .ptype.o { color: var(--orange); border-color: rgba(255,92,0,.25); background: rgba(255,92,0,.05); }
-    .ptype.c { color: var(--cyan);   border-color: rgba(0,255,255,.2);  background: rgba(0,255,255,.04); }
-    .pstatus { font-family: var(--mono); font-size: 9px; color: #4ade80; letter-spacing: .12em; display: flex; align-items: center; gap: .3rem; }
-    .pstatus::before { content: '●'; }
-    .pname { font-family: var(--mono); font-size: 15px; font-weight: 700; margin-bottom: .55rem; letter-spacing: -.01em; }
-    .pdesc { font-size: 13px; line-height: 1.7; color: var(--muted); margin-bottom: 1.5rem; }
-    .pstack { display: flex; flex-wrap: wrap; gap: .4rem; }
-    .ptag {
-      font-family: var(--mono); font-size: 10px; padding: .2rem .55rem;
-      border: 1px solid var(--border); color: var(--dim);
-      letter-spacing: .05em;
-    }
-
-    /* ─── CONTACT ────────────────────────────────────── */
-    .contact-inner {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
-      align-items: start;
-    }
-    .contact-copy { font-size: 1rem; line-height: 1.9; color: #999; }
-    .contact-copy strong { color: var(--white); }
-    .contact-links { display: flex; flex-direction: column; gap: 1rem; }
-    .clink {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 1.1rem 1.25rem;
-      border: 1px solid var(--border); background: var(--card);
-      transition: all .2s; font-family: var(--mono); font-size: 13px; color: var(--muted);
-    }
-    .clink:hover { border-color: var(--orange); color: var(--white); background: #0d0d0d; }
-    .clink.ch:hover { border-color: var(--cyan); }
-    .clink img { width: 20px; height: 20px; filter: var(--glow-o); flex-shrink: 0; }
-    .clink.ch img { filter: var(--glow-c); }
-    .clink-label { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--dim); display: block; margin-bottom: .15rem; }
-    .clink-val   { color: var(--white); font-size: 13px; }
-
-    /* ─── FOOTER ─────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 8vw;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 1rem;
-    }
-    .ftag { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .ftag .o { color: var(--orange); }
-    .fgh {
-      display: flex; align-items: center; gap: .6rem;
-      font-family: var(--mono); font-size: 12px;
-      transition: color .2s;
-    }
-    .fgh:hover { color: var(--cyan); }
-    .fgh svg { flex-shrink: 0; }
-    .fcopy { font-family: var(--mono); font-size: 11px; color: var(--dim); }
-
-    /* ─── RESPONSIVE ─────────────────────────────────── */
-    @media (max-width: 900px) {
-      .about-grid, .contact-inner { grid-template-columns: 1fr; }
-      .nav-links { display: none; }
-    }
-    @media (max-width: 600px) {
-      nav { padding: 0 1.25rem; }
-      .wrap { padding: 5rem 1.25rem; }
-      footer { padding: 2rem 1.25rem; flex-direction: column; align-items: flex-start; }
-      .proj-grid { grid-template-columns: 1fr; }
-      .hero-name { font-size: clamp(2.8rem, 14vw, 5rem); }
-    }
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media(max-width:900px){.agrid,.cgrid{grid-template-columns:1fr} .nlinks{display:none}}
+    @media(max-width:600px){nav{padding:0 1.25rem} .wrap{padding:5rem 1.25rem} footer{padding:2rem 1.25rem;flex-direction:column;align-items:flex-start} .pgrid{grid-template-columns:1fr} .hname{font-size:clamp(2.8rem,14vw,5rem)}}
   </style>
 </head>
 <body>
 
-<!-- ─── CURSOR ──────────────────────────────────────── -->
-<div class="cursor"      id="cur"></div>
-<div class="cursor-ring" id="ring"></div>
+<!-- Cursor -->
+<div class="cur" id="cur"></div>
+<div class="ring" id="ring"></div>
 
-<!-- ─── BOOT ────────────────────────────────────────── -->
+<!-- Boot -->
 <div id="boot">
   <div id="blines"></div>
-  <div class="boot-bar-wrap"><div class="boot-bar" id="bbar"></div></div>
+  <div class="bw"><div class="bb" id="bbar"></div></div>
 </div>
 
-<!-- ─── NAV ─────────────────────────────────────────── -->
+<!-- Nav -->
 <nav id="nav">
-  <a href="#hero" class="nav-logo">JDC<span class="o">/</span><span class="c">_</span></a>
-  <div class="nav-status"><div class="ndot"></div><span id="nsec">// online</span></div>
-  <ul class="nav-links">
+  <a href="#hero" class="nlogo">JDC<span class="o">/</span><span class="c">_</span></a>
+  <div class="nstat"><div class="ndot"></div><span id="nsec">// online</span></div>
+  <ul class="nlinks">
     <li><a href="#about">01.about</a></li>
     <li><a href="#skills">02.skills</a></li>
     <li><a href="#projects">03.projects</a></li>
     <li><a href="#contact">04.contact</a></li>
   </ul>
+  <button class="theme-btn" id="themeBtn" title="Toggle theme">
+    <!-- moon (shown in dark) -->
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+    <!-- sun (shown in light) -->
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <span class="icon-moon">dark</span>
+    <span class="icon-sun">light</span>
+  </button>
 </nav>
 
-<!-- ─── HERO ─────────────────────────────────────────── -->
+<!-- Hero -->
 <section id="hero">
   <div class="hgrid"></div>
+  <canvas id="beams-canvas"></canvas>
   <div class="hscan"></div>
   <div class="hline"></div>
 
-  <div class="hero-content">
-    <!-- GitHub profile photo -->
-    <div class="profile-ring">
-      <img src="https://github.com/JuanDiegoCastellanos.png" alt="Juan Diego Castellanos" loading="eager">
-    </div>
-
-    <p class="hero-tag">// sre engineer · devops · cloud native · ai integrations</p>
-
-    <h1 class="hero-name">
+  <div class="hcontent">
+    <div class="pring"><img src="https://github.com/JuanDiegoCastellanos.png" alt="Juan Diego Castellanos" loading="eager"></div>
+    <p class="htag">// sre engineer · devops · cloud native · ai integrations</p>
+    <h1 class="hname">
       <span class="gw" data-text="JUAN DIEGO">JUAN DIEGO</span>
       <span class="gw" data-text="CASTELLANOS">CASTELLANOS</span>
     </h1>
-
-    <div class="hero-prompt">
+    <div class="hprompt">
       <span class="psym">$&nbsp;</span>
       <span id="tw"></span>
       <span class="tcur"></span>
     </div>
-
-    <div class="hero-cta">
-      <a href="#projects" class="btn btn-p">ver proyectos</a>
-      <a href="#contact"  class="btn btn-g">contactar</a>
+    <div class="hcta">
+      <a href="#projects" class="btn btnp">view projects</a>
+      <a href="#contact"  class="btn btng">get in touch</a>
     </div>
   </div>
-
-  <div class="scroll-hint">
-    <span>SCROLL</span>
-    <div class="sline"></div>
-  </div>
+  <div class="shint"><span>SCROLL</span><div class="sline"></div></div>
 </section>
 
-<!-- ─── ABOUT ────────────────────────────────────────── -->
+<!-- About -->
 <div class="band" id="about">
   <div class="wrap">
-    <p class="eyebrow rv">01 — about</p>
-    <h2 class="stitle rv">whoami<span class="d">;</span></h2>
-
-    <div class="about-grid">
-      <!-- Bio -->
+    <p class="eye rv">01 — about</p>
+    <h2 class="stit rv">whoami<span class="d">;</span></h2>
+    <div class="agrid">
       <div class="tcard rv">
         <div class="thead"><span class="path">~/jdc</span>&nbsp;$ cat bio.txt</div>
-        <p class="bio">
-          Ingeniero de sistemas especializado en SRE, DevOps y arquitecturas cloud. Desarrollo
-          <strong>soluciones empresariales a medida</strong>, plataformas <strong>SaaS</strong>
-          e <strong>integraciones con IA</strong> para pequeños emprendedores y grandes
-          organizaciones. Apasionado por automatizar lo tedioso y escalar lo que funciona.
-        </p>
+        <p class="bio">Systems engineer and SRE specialist building <strong>enterprise solutions</strong>, <strong>SaaS platforms</strong>, and <strong>AI-powered integrations</strong> for startups and large organizations alike. Passionate about automating the tedious and scaling what works.</p>
         <div class="tags">
           <span class="tag hi">Enterprise Solutions</span>
           <span class="tag hi">SaaS Builder</span>
@@ -500,234 +299,222 @@
           <span class="tag">Problem Solver</span>
         </div>
       </div>
-
-      <!-- Stats -->
       <div class="tcard rv" style="transition-delay:.15s">
         <div class="thead"><span class="path">~/jdc</span>&nbsp;$ cat stats.json</div>
-        <div class="stats4">
-          <div class="scell">
-            <span class="sval">15<span class="o">+</span></span>
-            <span class="skey">Technologies</span>
-          </div>
-          <div class="scell">
-            <span class="sval">4<span class="c">+</span></span>
-            <span class="skey">Cloud Platforms</span>
-          </div>
-          <div class="scell">
-            <span class="sval">10<span class="o">+</span></span>
-            <span class="skey">Projects in Prod</span>
-          </div>
-          <div class="scell">
-            <span class="sval">🌐</span>
-            <span class="skey">Open to the World</span>
-          </div>
+        <div class="s4">
+          <div class="sc"><span class="sv">15<span class="o">+</span></span><span class="sk">Technologies</span></div>
+          <div class="sc"><span class="sv">4<span class="c">+</span></span><span class="sk">Cloud Platforms</span></div>
+          <div class="sc"><span class="sv">10<span class="o">+</span></span><span class="sk">Projects in Prod</span></div>
+          <div class="sc"><span class="sv">🌐</span><span class="sk">Open to the World</span></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── SKILLS ───────────────────────────────────────── -->
+<!-- Skills -->
 <div class="band" id="skills">
   <div class="wrap">
-    <p class="eyebrow rv">02 — skills</p>
-    <h2 class="stitle rv">tech_stack<span class="d">()</span></h2>
+    <p class="eye rv">02 — skills</p>
+    <h2 class="stit rv">tech_stack<span class="d">()</span></h2>
 
-    <!-- BACKEND ENGINEERING -->
-    <div class="sk-section rv">
-      <p class="sk-label"><span class="cc">// </span>Backend Engineering</p>
-      <div class="sk-grid">
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/go/FF5C00"       alt="Go"><span class="sk-n">Go</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/nodedotjs/00FFFF" alt="Node.js"><span class="sk-n">Node.js</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/dotnet/FF5C00"    alt=".NET"><span class="sk-n">.NET</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/express/00FFFF"   alt="Express"><span class="sk-n">Express.js</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/apachekafka/FF5C00" alt="Kafka"><span class="sk-n">Kafka</span></div>
-        <div class="sk-txt  c">gRPC</div>
-        <div class="sk-txt  o">REST APIs</div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/jsonwebtokens/00FFFF" alt="JWT"><span class="sk-n">JWT</span></div>
+    <!-- Backend Engineering -->
+    <div class="ssec rv">
+      <p class="slbl"><span class="cc">// </span>Backend Engineering</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-go-plain"></i><span class="sn">Go</span></div>
+        <div class="skc c"><i class="devicon-nodejs-plain"></i><span class="sn">Node.js</span></div>
+        <div class="skc o"><i class="devicon-dot-net-plain"></i><span class="sn">.NET</span></div>
+        <div class="skc c"><i class="devicon-express-original"></i><span class="sn">Express.js</span></div>
+        <div class="skc o"><i class="devicon-nextjs-plain"></i><span class="sn">Next.js</span></div>
+        <div class="skc c"><i class="devicon-apachekafka-original"></i><span class="sn">Kafka</span></div>
+        <!-- gRPC — inline SVG -->
+        <div class="skc o">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="12" cy="4" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="4" cy="16" r="2"/>
+            <line x1="12" y1="6" x2="19" y2="15"/><line x1="12" y1="6" x2="5" y2="15"/>
+            <line x1="6" y1="16" x2="18" y2="16"/>
+          </svg>
+          <span class="sn">gRPC</span>
+        </div>
+        <!-- REST APIs — inline SVG -->
+        <div class="skc c">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M4 9h16M4 15h16"/><polyline points="10 3 4 9 10 15"/><polyline points="14 9 20 15 14 21"/>
+          </svg>
+          <span class="sn">REST APIs</span>
+        </div>
+        <div class="skc o"><i class="devicon-python-plain"></i><span class="sn">Python</span></div>
       </div>
     </div>
 
-    <!-- CLOUD & INFRASTRUCTURE -->
-    <div class="sk-section rv" style="transition-delay:.08s">
-      <p class="sk-label"><span class="cc">// </span>Cloud &amp; Infrastructure</p>
-      <div class="sk-grid">
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/amazonaws/FF5C00"     alt="AWS"><span class="sk-n">AWS</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/microsoftazure/00FFFF" alt="Azure"><span class="sk-n">Azure</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/googlecloud/FF5C00"   alt="GCP"><span class="sk-n">GCP</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/digitalocean/00FFFF"  alt="DigitalOcean"><span class="sk-n">DigitalOcean</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/docker/FF5C00"        alt="Docker"><span class="sk-n">Docker</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/kubernetes/00FFFF"    alt="Kubernetes"><span class="sk-n">Kubernetes</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/terraform/FF5C00"     alt="Terraform"><span class="sk-n">Terraform</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/nginx/00FFFF"         alt="Nginx"><span class="sk-n">Nginx</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/linux/FF5C00"         alt="Linux"><span class="sk-n">Linux</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/firebase/00FFFF"      alt="Firebase"><span class="sk-n">Firebase</span></div>
+    <!-- Cloud & Infrastructure -->
+    <div class="ssec rv" style="transition-delay:.08s">
+      <p class="slbl"><span class="cc">// </span>Cloud &amp; Infrastructure</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-amazonwebservices-plain"></i><span class="sn">AWS</span></div>
+        <div class="skc c"><i class="devicon-azure-plain"></i><span class="sn">Azure</span></div>
+        <div class="skc o"><i class="devicon-googlecloud-plain"></i><span class="sn">GCP</span></div>
+        <div class="skc c"><i class="devicon-digitalocean-plain"></i><span class="sn">DigitalOcean</span></div>
+        <div class="skc o"><i class="devicon-docker-plain"></i><span class="sn">Docker</span></div>
+        <div class="skc c"><i class="devicon-kubernetes-plain"></i><span class="sn">Kubernetes</span></div>
+        <div class="skc o"><i class="devicon-terraform-plain"></i><span class="sn">Terraform</span></div>
+        <div class="skc c"><i class="devicon-nginx-plain"></i><span class="sn">Nginx</span></div>
+        <div class="skc o"><i class="devicon-linux-plain"></i><span class="sn">Linux</span></div>
+        <div class="skc c"><i class="devicon-firebase-plain"></i><span class="sn">Firebase</span></div>
+        <div class="skt c">Caddy</div>
       </div>
     </div>
 
-    <!-- DEVOPS & AUTOMATION -->
-    <div class="sk-section rv" style="transition-delay:.16s">
-      <p class="sk-label"><span class="cc">// </span>DevOps &amp; Automation</p>
-      <div class="sk-grid">
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/gitlab/FF5C00"         alt="GitLab"><span class="sk-n">GitLab CI</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/jenkins/00FFFF"        alt="Jenkins"><span class="sk-n">Jenkins</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/azuredevops/FF5C00"    alt="Azure DevOps"><span class="sk-n">Azure DevOps</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/n8n/00FFFF"            alt="n8n"><span class="sk-n">n8n</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/githubactions/FF5C00"  alt="GitHub Actions"><span class="sk-n">GH Actions</span></div>
-        <div class="sk-txt  c">Pipelines CI/CD</div>
-        <div class="sk-txt  o">IaC</div>
+    <!-- Observability & Monitoring -->
+    <div class="ssec rv" style="transition-delay:.16s">
+      <p class="slbl"><span class="cc">// </span>Observability &amp; Monitoring</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-grafana-plain"></i><span class="sn">Grafana</span></div>
+        <div class="skc c"><i class="devicon-prometheus-plain"></i><span class="sn">Prometheus</span></div>
+        <!-- Vector — inline SVG (logs router) -->
+        <div class="skc o">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span class="sn">Vector</span>
+        </div>
+        <div class="skc c"><i class="devicon-elasticsearch-plain"></i><span class="sn">Elastic</span></div>
+        <div class="skc o"><i class="devicon-redis-plain"></i><span class="sn">Redis</span></div>
       </div>
     </div>
 
-    <!-- LANGUAGES -->
-    <div class="sk-section rv" style="transition-delay:.24s">
-      <p class="sk-label"><span class="cc">// </span>Languages</p>
-      <div class="sk-grid">
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/go/FF5C00"          alt="Go"><span class="sk-n">Go</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/typescript/00FFFF"  alt="TypeScript"><span class="sk-n">TypeScript</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/python/FF5C00"      alt="Python"><span class="sk-n">Python</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/csharp/00FFFF"      alt="C#"><span class="sk-n">C#</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/javascript/FF5C00"  alt="JavaScript"><span class="sk-n">JavaScript</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/java/00FFFF"        alt="Java"><span class="sk-n">Java</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/dart/FF5C00"        alt="Dart"><span class="sk-n">Dart</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/php/00FFFF"         alt="PHP"><span class="sk-n">PHP</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/gnubash/FF5C00"     alt="Shell"><span class="sk-n">Shell</span></div>
+    <!-- DevOps & Automation -->
+    <div class="ssec rv" style="transition-delay:.24s">
+      <p class="slbl"><span class="cc">// </span>DevOps &amp; Automation</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-gitlab-plain"></i><span class="sn">GitLab CI</span></div>
+        <div class="skc c"><i class="devicon-jenkins-plain"></i><span class="sn">Jenkins</span></div>
+        <div class="skc o"><i class="devicon-azure-plain"></i><span class="sn">Azure DevOps</span></div>
+        <div class="skc c"><i class="devicon-github-plain"></i><span class="sn">GH Actions</span></div>
+        <!-- Pipelines CI/CD — inline SVG -->
+        <div class="skc o">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+            <line x1="7" y1="12" x2="10" y2="12"/><line x1="14" y1="12" x2="17" y2="12"/>
+            <path d="M5 10V7l7-4 7 4v3"/>
+          </svg>
+          <span class="sn">Pipelines</span>
+        </div>
+        <!-- IaC — inline SVG -->
+        <div class="skc c">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span class="sn">IaC</span>
+        </div>
+        <div class="skt o">n8n</div>
       </div>
     </div>
 
-    <!-- FRONTEND & MOBILE -->
-    <div class="sk-section rv" style="transition-delay:.32s">
-      <p class="sk-label"><span class="cc">// </span>Frontend &amp; Mobile</p>
-      <div class="sk-grid">
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/react/00FFFF"   alt="React"><span class="sk-n">React</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/angular/FF5C00" alt="Angular"><span class="sk-n">Angular</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/flutter/00FFFF" alt="Flutter"><span class="sk-n">Flutter</span></div>
+    <!-- Languages -->
+    <div class="ssec rv" style="transition-delay:.32s">
+      <p class="slbl"><span class="cc">// </span>Languages</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-go-plain"></i><span class="sn">Go</span></div>
+        <div class="skc c"><i class="devicon-typescript-plain"></i><span class="sn">TypeScript</span></div>
+        <div class="skc o"><i class="devicon-python-plain"></i><span class="sn">Python</span></div>
+        <div class="skc c"><i class="devicon-csharp-plain"></i><span class="sn">C#</span></div>
+        <div class="skc o"><i class="devicon-javascript-plain"></i><span class="sn">JavaScript</span></div>
+        <div class="skc c"><i class="devicon-java-plain"></i><span class="sn">Java</span></div>
+        <div class="skc o"><i class="devicon-kotlin-plain"></i><span class="sn">Kotlin</span></div>
+        <div class="skc c"><i class="devicon-dart-plain"></i><span class="sn">Dart</span></div>
+        <div class="skc o"><i class="devicon-php-plain"></i><span class="sn">PHP</span></div>
+        <div class="skc c"><i class="devicon-bash-plain"></i><span class="sn">Shell</span></div>
       </div>
     </div>
 
-    <!-- DATABASES -->
-    <div class="sk-section rv" style="transition-delay:.4s">
-      <p class="sk-label"><span class="cc">// </span>Databases</p>
-      <div class="sk-grid">
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/postgresql/FF5C00" alt="PostgreSQL"><span class="sk-n">PostgreSQL</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/mongodb/00FFFF"    alt="MongoDB"><span class="sk-n">MongoDB</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/mysql/FF5C00"      alt="MySQL"><span class="sk-n">MySQL</span></div>
-        <div class="sk-card c"><img src="https://cdn.simpleicons.org/mariadb/00FFFF"    alt="MariaDB"><span class="sk-n">MariaDB</span></div>
-        <div class="sk-card o"><img src="https://cdn.simpleicons.org/sqlite/FF5C00"     alt="SQLite"><span class="sk-n">SQLite</span></div>
+    <!-- Frontend & Mobile -->
+    <div class="ssec rv" style="transition-delay:.4s">
+      <p class="slbl"><span class="cc">// </span>Frontend &amp; Mobile</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-react-original"></i><span class="sn">React</span></div>
+        <div class="skc c"><i class="devicon-nextjs-plain"></i><span class="sn">Next.js</span></div>
+        <div class="skc o"><i class="devicon-angular-plain"></i><span class="sn">Angular</span></div>
+        <div class="skc c"><i class="devicon-flutter-plain"></i><span class="sn">Flutter</span></div>
       </div>
     </div>
 
+    <!-- Databases -->
+    <div class="ssec rv" style="transition-delay:.48s">
+      <p class="slbl"><span class="cc">// </span>Databases</p>
+      <div class="sgrid">
+        <div class="skc o"><i class="devicon-postgresql-plain"></i><span class="sn">PostgreSQL</span></div>
+        <div class="skc c"><i class="devicon-mongodb-plain"></i><span class="sn">MongoDB</span></div>
+        <div class="skc o"><i class="devicon-mysql-plain"></i><span class="sn">MySQL</span></div>
+        <div class="skc c"><i class="devicon-mariadb-plain"></i><span class="sn">MariaDB</span></div>
+        <div class="skc o"><i class="devicon-sqlite-plain"></i><span class="sn">SQLite</span></div>
+        <div class="skc c"><i class="devicon-redis-plain"></i><span class="sn">Redis</span></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ─── PROJECTS ─────────────────────────────────────── -->
+<!-- Projects -->
 <div class="band" id="projects">
   <div class="wrap">
-    <p class="eyebrow rv">03 — projects</p>
-    <h2 class="stitle rv">selected_work<span class="d">[]</span></h2>
+    <p class="eye rv">03 — projects</p>
+    <h2 class="stit rv">selected_work<span class="d">[]</span></h2>
+    <div class="pgrid">
 
-    <div class="proj-grid">
-
-      <!-- Olenna -->
       <div class="pcard rv">
-        <div class="ph">
-          <span class="ptype o">SaaS</span>
-          <span class="pstatus">Production</span>
-        </div>
-        <h3 class="pname">Olenna Platform</h3>
-        <p class="pdesc">Suite completa para gestión de conjuntos residenciales. App móvil, portal web y API robusta. Gestión de propietarios, asambleas, PQR, pagos y comunicación interna.</p>
-        <div class="pstack">
-          <span class="ptag">Flutter</span>
-          <span class="ptag">Angular</span>
-          <span class="ptag">Node.js</span>
-          <span class="ptag">PostgreSQL</span>
-          <span class="ptag">Docker</span>
-          <span class="ptag">AWS</span>
+        <div class="ph"><span class="pty o">SaaS</span><span class="ps">Production</span></div>
+        <h3 class="pn">Olenna Platform</h3>
+        <p class="pd">Full suite for residential complex management. Mobile app, web portal and robust API. Handles owners, assemblies, PQR, payments, and internal communication.</p>
+        <div class="pst">
+          <span class="pt">Flutter</span><span class="pt c">Angular</span><span class="pt">Node.js</span><span class="pt c">PostgreSQL</span><span class="pt">Docker</span><span class="pt c">AWS</span>
         </div>
       </div>
 
-      <!-- Esvilla -->
       <div class="pcard rv" style="transition-delay:.07s">
-        <div class="ph">
-          <span class="ptype c">Enterprise</span>
-          <span class="pstatus">Production</span>
-        </div>
-        <h3 class="pname">Esvilla</h3>
-        <p class="pdesc">Sistema de gestión y administración para empresa de servicios públicos de Villa de Leyva. Control de usuarios, facturación, reportes y gestión operativa completa.</p>
-        <div class="pstack">
-          <span class="ptag">.NET</span>
-          <span class="ptag">Angular</span>
-          <span class="ptag">PostgreSQL</span>
-          <span class="ptag">Azure</span>
-          <span class="ptag">Docker</span>
+        <div class="ph"><span class="pty c">Enterprise</span><span class="ps">Production</span></div>
+        <h3 class="pn">Esvilla</h3>
+        <p class="pd">Management and administration system for the public utilities company of Villa de Leyva. User management, billing, reporting and full operational control.</p>
+        <div class="pst">
+          <span class="pt c">.NET</span><span class="pt">Angular</span><span class="pt c">PostgreSQL</span><span class="pt">Azure</span><span class="pt c">Docker</span>
         </div>
       </div>
 
-      <!-- HexalSoft Deployments -->
       <div class="pcard rv" style="transition-delay:.14s">
-        <div class="ph">
-          <span class="ptype o">DevOps Tool</span>
-          <span class="pstatus">Production</span>
-        </div>
-        <h3 class="pname">HexalSoft Deployments</h3>
-        <p class="pdesc">Herramienta interna que conecta pipelines de GitLab y sus artefactos con infraestructura Docker. Acelera deploys, permite redesplegar cualquier rama y gestiona permisos de acceso.</p>
-        <div class="pstack">
-          <span class="ptag">Go</span>
-          <span class="ptag">Docker</span>
-          <span class="ptag">GitLab CI</span>
-          <span class="ptag">gRPC</span>
-          <span class="ptag">JWT</span>
+        <div class="ph"><span class="pty o">DevOps Tool</span><span class="ps">Production</span></div>
+        <h3 class="pn">HexalSoft Deployments</h3>
+        <p class="pd">Internal tool connecting GitLab pipelines and artifacts to Docker infrastructure. Speeds up deploys, redeploy any branch on demand, with auth and permission management.</p>
+        <div class="pst">
+          <span class="pt">Go</span><span class="pt c">Docker</span><span class="pt">GitLab CI</span><span class="pt c">gRPC</span><span class="pt">JWT</span>
         </div>
       </div>
 
-      <!-- MobilCash Watcher API -->
       <div class="pcard rv" style="transition-delay:.21s">
-        <div class="ph">
-          <span class="ptype c">Infrastructure</span>
-          <span class="pstatus">Production</span>
-        </div>
-        <h3 class="pname">MobilCash Watcher API</h3>
-        <p class="pdesc">Sistema que se integra con Elastic Beanstalk, Docker y Kubernetes para automatizar el despliegue de nuevas versiones de imágenes del sistema de manera controlada y segura.</p>
-        <div class="pstack">
-          <span class="ptag">Go</span>
-          <span class="ptag">AWS</span>
-          <span class="ptag">Kubernetes</span>
-          <span class="ptag">Docker</span>
-          <span class="ptag">Elastic Beanstalk</span>
+        <div class="ph"><span class="pty c">Infrastructure</span><span class="ps">Production</span></div>
+        <h3 class="pn">MobilCash Watcher API</h3>
+        <p class="pd">System integrating with Elastic Beanstalk, Docker and Kubernetes to automate the deployment of new image versions in a controlled and secure manner.</p>
+        <div class="pst">
+          <span class="pt c">Go</span><span class="pt">AWS</span><span class="pt c">Kubernetes</span><span class="pt">Docker</span><span class="pt c">Elastic Beanstalk</span>
         </div>
       </div>
 
-      <!-- AI Workflows -->
       <div class="pcard rv" style="transition-delay:.28s">
-        <div class="ph">
-          <span class="ptype o">AI Integration</span>
-          <span class="pstatus">Active</span>
-        </div>
-        <h3 class="pname">AI Workflows + WhatsApp Business</h3>
-        <p class="pdesc">Integración de procesos empresariales con IA para automatizar tareas repetitivas. Colaboración y soporte en la conexión de flujos de trabajo con WhatsApp Business API.</p>
-        <div class="pstack">
-          <span class="ptag">n8n</span>
-          <span class="ptag">OpenAI</span>
-          <span class="ptag">WhatsApp API</span>
-          <span class="ptag">Node.js</span>
-          <span class="ptag">Webhooks</span>
+        <div class="ph"><span class="pty o">AI Integration</span><span class="ps">Active</span></div>
+        <h3 class="pn">AI Workflows + WhatsApp Business</h3>
+        <p class="pd">Connecting business processes with AI to automate repetitive tasks via WhatsApp Business API. Collaboration and ongoing support for workflow automation.</p>
+        <div class="pst">
+          <span class="pt">n8n</span><span class="pt c">OpenAI</span><span class="pt">WhatsApp API</span><span class="pt c">Node.js</span><span class="pt">Webhooks</span>
         </div>
       </div>
 
-      <!-- Infra Modernization -->
       <div class="pcard rv" style="transition-delay:.35s">
-        <div class="ph">
-          <span class="ptype c">Infrastructure</span>
-          <span class="pstatus">Active</span>
-        </div>
-        <h3 class="pname">Infra Modernization: Terraform + n8n</h3>
-        <p class="pdesc">Modernización de la gestión de infraestructura usando n8n con Terraform para automatizar operaciones de cloud, reducir errores manuales y acelerar la administración del entorno.</p>
-        <div class="pstack">
-          <span class="ptag">Terraform</span>
-          <span class="ptag">n8n</span>
-          <span class="ptag">AWS</span>
-          <span class="ptag">Azure</span>
-          <span class="ptag">IaC</span>
+        <div class="ph"><span class="pty c">Infrastructure</span><span class="ps">Active</span></div>
+        <h3 class="pn">Infra Modernization: Terraform + n8n</h3>
+        <p class="pd">Modernizing infrastructure management using n8n with Terraform to automate cloud operations, reduce manual errors and speed up environment administration.</p>
+        <div class="pst">
+          <span class="pt c">Terraform</span><span class="pt">n8n</span><span class="pt c">AWS</span><span class="pt">Azure</span><span class="pt c">IaC</span>
         </div>
       </div>
 
@@ -735,167 +522,196 @@
   </div>
 </div>
 
-<!-- ─── CONTACT ───────────────────────────────────────── -->
+<!-- Contact -->
 <div class="band" id="contact">
   <div class="wrap">
-    <p class="eyebrow rv">04 — contact</p>
-    <h2 class="stitle rv">get_in_touch<span class="d">()</span></h2>
-
-    <div class="contact-inner">
+    <p class="eye rv">04 — contact</p>
+    <h2 class="stit rv">get_in_touch<span class="d">()</span></h2>
+    <div class="cgrid">
       <div class="rv">
-        <p class="contact-copy">
-          ¿Tienes un proyecto que necesita <strong>arquitectura sólida</strong>,
-          <strong>infraestructura escalable</strong> o una <strong>integración con IA</strong>?<br><br>
-          Disponible para proyectos empresariales, desarrollo de SaaS, consultoría DevOps y
-          automatización de procesos. No importa el tamaño de tu empresa.
-        </p>
+        <p class="ccopy">Got a project that needs <strong>solid architecture</strong>, <strong>scalable infrastructure</strong>, or an <strong>AI integration</strong>?<br><br>Available for enterprise projects, SaaS development, DevOps consulting, and process automation. No matter the size of your company.</p>
       </div>
-
-      <div class="contact-links rv" style="transition-delay:.15s">
-        <a href="mailto:juandiego.castellanosjerez@gmail.com" class="clink">
-          <img src="https://cdn.simpleicons.org/gmail/FF5C00" alt="Email">
-          <div>
-            <span class="clink-label">Email</span>
-            <span class="clink-val">juandiego.castellanosjerez@gmail.com</span>
-          </div>
+      <div class="clinks rv" style="transition-delay:.15s">
+        <a href="mailto:juandiego.castellanosjerez@gmail.com" class="clink o">
+          <i class="devicon-google-plain" style="color:var(--orange);filter:var(--go)"></i>
+          <div><span class="clbl">Email</span><span class="cval">juandiego.castellanosjerez@gmail.com</span></div>
         </a>
-
         <a href="https://wa.me/573028495601" target="_blank" class="clink ch">
-          <img src="https://cdn.simpleicons.org/whatsapp/00FFFF" alt="WhatsApp">
-          <div>
-            <span class="clink-label">WhatsApp</span>
-            <span class="clink-val">+57 302 849 5601</span>
-          </div>
+          <!-- WhatsApp SVG inline -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cyan);filter:var(--gc);flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <div><span class="clbl">WhatsApp</span><span class="cval">+57 302 849 5601</span></div>
         </a>
-
-        <a href="https://www.linkedin.com/in/juan-diego-castellanos-jerez/" target="_blank" class="clink">
-          <img src="https://cdn.simpleicons.org/linkedin/FF5C00" alt="LinkedIn">
-          <div>
-            <span class="clink-label">LinkedIn</span>
-            <span class="clink-val">juan-diego-castellanos-jerez</span>
-          </div>
+        <a href="https://www.linkedin.com/in/juan-diego-castellanos-jerez/" target="_blank" class="clink o">
+          <!-- LinkedIn SVG inline -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:var(--orange);filter:var(--go);flex-shrink:0"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <div><span class="clbl">LinkedIn</span><span class="cval">juan-diego-castellanos-jerez</span></div>
         </a>
-
         <a href="https://github.com/JuanDiegoCastellanos" target="_blank" class="clink ch">
-          <img src="https://cdn.simpleicons.org/github/00FFFF" alt="GitHub">
-          <div>
-            <span class="clink-label">GitHub</span>
-            <span class="clink-val">github.com/JuanDiegoCastellanos</span>
-          </div>
+          <i class="devicon-github-plain" style="color:var(--cyan);filter:var(--gc)"></i>
+          <div><span class="clbl">GitHub</span><span class="cval">JuanDiegoCastellanos</span></div>
         </a>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── FOOTER ────────────────────────────────────────── -->
+<!-- Footer -->
 <footer>
   <p class="ftag"><span class="o">// </span>building resilient systems, one deploy at a time</p>
   <a href="https://github.com/JuanDiegoCastellanos" target="_blank" class="fgh">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
-    </svg>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
     JuanDiegoCastellanos
   </a>
-  <p class="fcopy">© 2025 JDC</p>
+  <p class="fcp">© 2025 JDC</p>
 </footer>
 
-<!-- ─── SCRIPTS ───────────────────────────────────────── -->
 <script>
-/* ── Cursor (GPU-accelerated via transform only) ───────
-   Both elements live at left:0,top:0 and are repositioned
-   exclusively through transform, never left/top → no layout reflow */
-const cur  = document.getElementById('cur');
-const ring = document.getElementById('ring');
-let mx=window.innerWidth/2, my=window.innerHeight/2;
-let rx=mx, ry=my;
+/* ── Cursor (transform-only = no layout reflow) ───── */
+const cur=document.getElementById('cur'),ring=document.getElementById('ring');
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY},{passive:true});
+(function t(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;cur.style.transform=`translate(${mx-4}px,${my-4}px)`;ring.style.transform=`translate(${rx-15}px,${ry-15}px)`;requestAnimationFrame(t)})();
+document.querySelectorAll('a,button,.skc,.skt,.pcard,.sc,.tag,.clink').forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'))});
 
-document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; }, {passive:true});
-
-(function tick(){
-  // ring lags behind cursor with lerp
-  rx += (mx-rx)*0.13;
-  ry += (my-ry)*0.13;
-  cur.style.transform  = `translate(${mx-4}px,${my-4}px)`;
-  ring.style.transform = `translate(${rx-15}px,${ry-15}px)`;
-  requestAnimationFrame(tick);
-})();
-
-document.querySelectorAll('a,button,.sk-card,.sk-txt,.pcard,.scell,.tag,.clink').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+/* ── Theme toggle ───────────────────────────────── */
+const html=document.documentElement;
+if(localStorage.getItem('theme')==='light') html.classList.add('light');
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  html.classList.toggle('light');
+  localStorage.setItem('theme',html.classList.contains('light')?'light':'dark');
+  initBeams(); // re-init beams with theme colors
 });
 
-/* ── Boot sequence ─────────────────────────────────── */
-const bootData=[
-  {t:'PORTFOLIO SYSTEM v2.0 — Juan Diego Castellanos', cls:'',  ms:0},
-  {t:'',                                               cls:'d', ms:120},
-  {t:'> Checking environment......             [OK]',  cls:'g', ms:200},
-  {t:'> Loading profile: JuanDiegoCastellanos  [OK]',  cls:'g', ms:430},
-  {t:'> Mounting cloud infrastructure.......   [OK]',  cls:'g', ms:650},
-  {t:'> Starting DevOps pipelines..........    [OK]',  cls:'g', ms:830},
-  {t:'> Booting AI integrations............    [OK]',  cls:'g', ms:980},
-  {t:'> Applying Terraform modules.........    [OK]',  cls:'g', ms:1100},
-  {t:'',                                               cls:'d', ms:1220},
-  {t:'  STATUS: ONLINE — Open to the World 🌐',       cls:'w', ms:1280},
-  {t:'  Press any key or scroll to continue...',       cls:'d', ms:1450},
+/* ── Boot sequence ──────────────────────────────── */
+const bd=[
+  {t:'PORTFOLIO SYSTEM v2.0 — Juan Diego Castellanos',cls:'',  ms:0},
+  {t:'',                                              cls:'d', ms:120},
+  {t:'> Checking environment.....................[OK]',cls:'g', ms:200},
+  {t:'> Loading profile: JuanDiegoCastellanos..[OK]', cls:'g', ms:420},
+  {t:'> Mounting cloud infrastructure..........[OK]', cls:'g', ms:640},
+  {t:'> Starting DevOps pipelines...............[OK]', cls:'g', ms:820},
+  {t:'> Booting AI integrations.................[OK]', cls:'g', ms:970},
+  {t:'> Applying Terraform modules..............[OK]', cls:'g', ms:1090},
+  {t:'',                                              cls:'d', ms:1200},
+  {t:'  STATUS: ONLINE — Open to the World 🌐',       cls:'w', ms:1260},
+  {t:'  Press any key to continue...',                cls:'d', ms:1440},
 ];
-
-const blines=document.getElementById('blines');
-const bbar=document.getElementById('bbar');
-const bootEl=document.getElementById('boot');
+const blines=document.getElementById('blines'),bbar=document.getElementById('bbar'),bootEl=document.getElementById('boot');
 let dismissed=false;
-
-function dismiss(){
-  if(dismissed)return; dismissed=true;
-  bootEl.classList.add('out');
-  setTimeout(()=>bootEl.remove(),520);
-}
-
-bootData.forEach((item,i)=>{
-  setTimeout(()=>{
-    const el=document.createElement('div');
-    el.className='bl s '+item.cls; el.textContent=item.t;
-    blines.appendChild(el);
-    bbar.style.width=((i+1)/bootData.length*100)+'%';
-    if(i===bootData.length-1) setTimeout(dismiss,900);
-  }, item.ms);
-});
-
+function dismiss(){if(dismissed)return;dismissed=true;bootEl.classList.add('out');setTimeout(()=>bootEl.remove(),520)}
+bd.forEach((item,i)=>setTimeout(()=>{const el=document.createElement('div');el.className='bl s '+item.cls;el.textContent=item.t;blines.appendChild(el);bbar.style.width=((i+1)/bd.length*100)+'%';if(i===bd.length-1)setTimeout(dismiss,900)},item.ms));
 document.addEventListener('keydown',dismiss);
 document.addEventListener('wheel',dismiss,{passive:true});
 document.addEventListener('touchstart',dismiss,{passive:true});
 
-/* ── Typewriter ─────────────────────────────────────── */
+/* ── Typewriter ─────────────────────────────────── */
 const phrases=['SRE Engineer','DevOps Architect','Cloud Native','SaaS Builder','AI Integrations','Go Developer'];
 let pi=0,ci=0,del=false;
 const twEl=document.getElementById('tw');
-
-function type(){
-  const cur=phrases[pi];
-  if(!del){ twEl.textContent=cur.slice(0,++ci); if(ci===cur.length){del=true;setTimeout(type,2100);return;} }
-  else    { twEl.textContent=cur.slice(0,--ci); if(ci===0){del=false;pi=(pi+1)%phrases.length;} }
-  setTimeout(type,del?52:90);
-}
+function type(){const c=phrases[pi];if(!del){twEl.textContent=c.slice(0,++ci);if(ci===c.length){del=true;setTimeout(type,2100);return}}else{twEl.textContent=c.slice(0,--ci);if(ci===0){del=false;pi=(pi+1)%phrases.length}}setTimeout(type,del?52:90)}
 setTimeout(type,2750);
 
-/* ── Navbar scroll ──────────────────────────────────── */
-const nav=document.getElementById('nav');
-const nsec=document.getElementById('nsec');
+/* ── Navbar ─────────────────────────────────────── */
+const nav=document.getElementById('nav'),nsec=document.getElementById('nsec');
 const secs=[...document.querySelectorAll('[id]')].filter(el=>['about','skills','projects','contact'].includes(el.id));
+window.addEventListener('scroll',()=>{nav.classList.toggle('sc',scrollY>40);let c='online';secs.forEach(s=>{if(s.getBoundingClientRect().top<=80)c=s.id});nsec.textContent='// '+c},{passive:true});
 
-window.addEventListener('scroll',()=>{
-  nav.classList.toggle('sc',window.scrollY>40);
-  let cur='online';
-  secs.forEach(s=>{ if(s.getBoundingClientRect().top<=80) cur=s.id; });
-  nsec.textContent='// '+cur;
-},{passive:true});
-
-/* ── Reveal on scroll ───────────────────────────────── */
-const io=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
-},{threshold:.08});
+/* ── Reveal ─────────────────────────────────────── */
+const io=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in')}),{threshold:.08});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ── Background Beams with Collision ───────────── */
+let beamRAF=null;
+function initBeams(){
+  if(beamRAF){cancelAnimationFrame(beamRAF);beamRAF=null}
+  const canvas=document.getElementById('beams-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const light=document.documentElement.classList.contains('light');
+  const PALETTE=light
+    ?['#FF5C00','#FF8040','#0099AA','#00BBCC','#FF6A20']
+    :['#FF5C00','#FF7A30','#00FFFF','#00DDDD','#FF9050','#00EEEE','#FFFFFF'];
+  let W,H,FLOOR,beams=[],sparks=[];
+
+  function resize(){
+    const r=canvas.parentElement.getBoundingClientRect();
+    W=canvas.width=r.width; H=canvas.height=r.height; FLOOR=H*.8;
+    beams=[]; sparks=[];
+    for(let i=0;i<14;i++)spawn(true);
+  }
+
+  function rnd(a,b){return a+Math.random()*(b-a)}
+  function pick(){return PALETTE[Math.floor(Math.random()*PALETTE.length)]}
+
+  function spawn(init=false){
+    const col=pick();
+    beams.push({
+      x:rnd(0,W), y:init?rnd(-200,FLOOR-.1):-rnd(60,250),
+      vy:rnd(1.0,2.2), vx:rnd(-.25,.25),
+      len:rnd(70,160), w:rnd(.6,1.6),
+      col, alpha:rnd(.3,.6)
+    });
+  }
+
+  function explode(x,col){
+    // particles
+    for(let i=0;i<12;i++){
+      const a=rnd(-Math.PI,0); // upward hemisphere
+      sparks.push({x,y:FLOOR,vx:Math.cos(a)*rnd(1,4),vy:Math.sin(a)*rnd(1,4),r:rnd(1,2.5),col,life:1,dec:rnd(.025,.05),ring:false});
+    }
+    // expanding ring
+    sparks.push({x,y:FLOOR,vx:0,vy:0,r:2,col,life:1,dec:.035,ring:true});
+  }
+
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+
+    // floor glow line
+    const fg=ctx.createLinearGradient(0,FLOOR,W,FLOOR);
+    fg.addColorStop(0,'transparent'); fg.addColorStop(.2,'rgba(255,92,0,.1)');
+    fg.addColorStop(.5,'rgba(0,220,220,.07)'); fg.addColorStop(.8,'rgba(255,92,0,.1)'); fg.addColorStop(1,'transparent');
+    ctx.fillStyle=fg; ctx.fillRect(0,FLOOR-.5,W,1.5);
+
+    // beams
+    for(let i=beams.length-1;i>=0;i--){
+      const b=beams[i]; b.x+=b.vx; b.y+=b.vy;
+      if(b.y>=FLOOR){explode(b.x,b.col);beams.splice(i,1);spawn();continue}
+      const ty=b.y-b.len;
+      const g=ctx.createLinearGradient(b.x,ty,b.x,b.y);
+      g.addColorStop(0,'transparent'); g.addColorStop(.6,b.col+'44'); g.addColorStop(1,b.col);
+      ctx.beginPath(); ctx.moveTo(b.x,ty); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=g; ctx.lineWidth=b.w; ctx.globalAlpha=b.alpha; ctx.stroke();
+      // head glow
+      const hg=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.w*4);
+      hg.addColorStop(0,b.col); hg.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.w*4,0,Math.PI*2);
+      ctx.fillStyle=hg; ctx.globalAlpha=b.alpha*.9; ctx.fill();
+      ctx.globalAlpha=1;
+    }
+
+    // sparks
+    for(let i=sparks.length-1;i>=0;i--){
+      const s=sparks[i]; s.life-=s.dec;
+      if(s.life<=0){sparks.splice(i,1);continue}
+      if(s.ring){
+        s.r+=2.5;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.strokeStyle=s.col; ctx.lineWidth=.8; ctx.globalAlpha=s.life*.5; ctx.stroke();
+      } else {
+        s.x+=s.vx; s.y+=s.vy; s.vy+=.08;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r*s.life,0,Math.PI*2);
+        ctx.fillStyle=s.col; ctx.globalAlpha=s.life*.9; ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+    beamRAF=requestAnimationFrame(frame);
+  }
+
+  resize();
+  window.addEventListener('resize',resize,{passive:true});
+  beamRAF=requestAnimationFrame(frame);
+}
+initBeams();
 </script>
 </body>
 </html>
