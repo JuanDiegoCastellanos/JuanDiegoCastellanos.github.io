@@ -109,8 +109,8 @@
     .hname{font-family:var(--mono);font-weight:700;font-size:clamp(3rem,9.5vw,9rem);line-height:.93;letter-spacing:-.03em;margin-bottom:2.5rem;color:#fff;opacity:0;animation:sup .7s ease .6s forwards}
     .gw{display:block;position:relative}
     .gw::before,.gw::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:var(--mono);font-weight:700;pointer-events:none}
-    .gw::before{color:var(--orange);animation:gb 7s ease infinite}
-    .gw::after{color:#00FFFF;animation:ga 7s ease infinite}
+    .gw::before{color:var(--orange);animation:gb 2.5s ease infinite}
+    .gw::after{color:#00FFFF;animation:ga 2.5s ease infinite}
     @keyframes gb{0%,82%,100%{opacity:0;clip-path:inset(100% 0 0 0)}83%{opacity:1;clip-path:inset(15% 0 70% 0);transform:translateX(-4px)}84%{opacity:1;clip-path:inset(65% 0 10% 0);transform:translateX(3px)}85%{opacity:1;clip-path:inset(40% 0 42% 0);transform:translateX(-2px)}86%{opacity:0}}
     @keyframes ga{0%,83%,100%{opacity:0;clip-path:inset(100% 0 0 0)}84%{opacity:1;clip-path:inset(55% 0 22% 0);transform:translateX(4px)}85%{opacity:1;clip-path:inset(8% 0 75% 0);transform:translateX(-3px)}86%{opacity:1;clip-path:inset(80% 0 5% 0);transform:translateX(2px)}87%{opacity:0}}
     .hprompt{display:flex;align-items:center;gap:.6rem;font-family:var(--mono);font-size:clamp(.9rem,2vw,1.3rem);color:#fff;margin-bottom:2.5rem;opacity:0;animation:sup .7s ease .85s forwards}
